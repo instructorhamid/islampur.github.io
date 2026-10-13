@@ -1,5 +1,6 @@
 import "server-only";
 import postgres from "postgres";
+import { limitConcurrency } from "./db-limit";
 import { env } from "./env";
 
 type Sql = ReturnType<typeof postgres>;
@@ -9,8 +10,9 @@ const globalForDb = globalThis as unknown as { __reunionSql?: Sql };
 
 function createClient(): Sql {
   const { url, ssl } = env.database;
-  return postgres(url, {
-    max: env.databasePoolMax,
+  const max = env.databasePoolMax;
+  const client = postgres(url, {
+    max,
     ssl: ssl ? "require" : false,
     // Required for transaction-mode poolers (Supabase pooler on port 6543, PgBouncer).
     prepare: false,
@@ -18,6 +20,8 @@ function createClient(): Sql {
     connect_timeout: 10,
     transform: { undefined: null },
   });
+  // Never more queries in flight than connections: pipelining hangs behind the Supabase pooler.
+  return limitConcurrency(client, max);
 }
 
 export const sql: Sql = globalForDb.__reunionSql ?? createClient();
