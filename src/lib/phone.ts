@@ -14,8 +14,3 @@ export function normalizeBdPhone(input: string): string | null {
   if (digits.length === 10 && digits.startsWith("1")) digits = `0${digits}`;
   return /^01[3-9]\d{8}$/.test(digits) ? digits : null;
 }
-
-/** Partially hide a phone number, e.g. "01712345678" → "017*****678". */
-export function maskPhone(phone: string): string {
-  return `${phone.slice(0, 3)}*****${phone.slice(-3)}`;
-}

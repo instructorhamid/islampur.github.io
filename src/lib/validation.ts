@@ -84,8 +84,6 @@ export function registrationSchema(range: { min: number; max: number }) {
   });
 }
 
-export type RegistrationInput = z.infer<ReturnType<typeof registrationSchema>>;
-
 /** Turn zod issues into a { field: firstMessage } map. */
 export function fieldErrors(error: z.ZodError): Record<string, string> {
   const out: Record<string, string> = {};

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { maskPhone, normalizeBdPhone } from "@/lib/phone";
+import { normalizeBdPhone } from "@/lib/phone";
 
 describe("normalizeBdPhone", () => {
   it.each([
@@ -23,8 +23,4 @@ describe("normalizeBdPhone", () => {
       expect(normalizeBdPhone(input)).toBeNull();
     },
   );
-
-  it("masks numbers", () => {
-    expect(maskPhone("01712345678")).toBe("017*****678");
-  });
 });
