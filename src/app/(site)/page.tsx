@@ -84,10 +84,11 @@ export default async function HomePage() {
               <Image
                 src={school.heroImage.src}
                 alt={school.heroImage.alt}
-                width={1200}
-                height={920}
+                width={school.heroImage.width}
+                height={school.heroImage.height}
                 priority
-                className="aspect-[600/460] w-full rounded-[2.25rem] object-cover shadow-[var(--shadow-lg)]"
+                sizes="(min-width: 1024px) 36rem, 100vw"
+                className="h-auto w-full rounded-[2.25rem] object-cover shadow-[var(--shadow-lg)]"
               />
             ) : (
               <HeroLandscape className="w-full drop-shadow-[0_24px_40px_rgba(11,93,54,0.18)]" />

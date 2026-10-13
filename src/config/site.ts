@@ -15,10 +15,15 @@ export const school = {
    */
   logoPath: null as string | null,
   /**
-   * Optional real photograph of the school for the homepage hero (e.g. "/images/school.jpg").
-   * Leave null to show the illustrated landscape.
+   * Optional real photograph of the school for the homepage hero (file in public/, with its pixel size).
+   * Set to null to show the illustrated landscape.
    */
-  heroImage: null as { src: string; alt: string } | null,
+  heroImage: {
+    src: "/images/school.webp",
+    alt: "ইসলামপুর উচ্চ বিদ্যালয়ের ভবনের সামনে সারিবদ্ধ শিক্ষার্থীরা",
+    width: 1534,
+    height: 1025,
+  } as { src: string; alt: string; width: number; height: number } | null,
 };
 
 export const site = {
