@@ -68,13 +68,14 @@ All are server-only except `NEXT_PUBLIC_SITE_URL`. See `.env.example` for commen
 | Variable | Required | Description |
 | --- | --- | --- |
 | `NEXT_PUBLIC_SITE_URL` | yes | Public base URL (canonical URLs, sitemap, Open Graph) |
-| `DATABASE_URL` | yes | PostgreSQL connection string |
-| `DATABASE_SSL` | hosted DBs | `require` for Supabase/Neon |
+| `DATABASE_URL` | yes* | PostgreSQL connection string (*or `POSTGRES_URL` from the Vercel–Supabase integration) |
+| `DATABASE_SSL` | no | `require`/`disable` to override automatic SSL detection |
 | `DATABASE_POOL_MAX` | no | Connections per instance (default 5; use 1–3 on serverless) |
 | `APP_SECRET` | yes (prod) | ≥24 random characters; keys the IP hashing |
-| `STORAGE_DRIVER` | no | `local` (default) or `supabase` |
+| `SETUP_TOKEN` | first deploy | One-time code for `/admin/setup` (creates the first admin; locks itself afterwards) |
+| `STORAGE_DRIVER` | no | `local` or `supabase` (auto: `supabase` when Supabase credentials exist) |
 | `LOCAL_UPLOAD_DIR` | local | Upload folder (default `./uploads`) |
-| `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `SUPABASE_STORAGE_BUCKET` | supabase | Storage credentials (never exposed to the browser) |
+| `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` (or `SUPABASE_SECRET_KEY`), `SUPABASE_STORAGE_BUCKET` | supabase | Storage credentials (never exposed to the browser); the private bucket is created automatically |
 | `MAX_UPLOAD_MB` | no | Maximum upload size (default 4; keep ≤4 on Vercel) |
 
 ### Scripts
@@ -82,7 +83,7 @@ All are server-only except `NEXT_PUBLIC_SITE_URL`. See `.env.example` for commen
 | Command | Purpose |
 | --- | --- |
 | `npm run dev` / `build` / `start` | Develop, build, serve |
-| `npm run db:migrate` | Apply new SQL migrations (each once, in a transaction) |
+| `npm run db:migrate` | Apply new SQL migrations (each once, in a transaction; runs automatically on Vercel via `vercel-build`) |
 | `npm run db:seed` | Insert demo data (`is_demo = true`); refuses to run with `NODE_ENV=production` |
 | `npm run db:clear-demo` | Remove demo rows (also available in `/admin/settings`) |
 | `npm run admin:create -- --email … --name … [--role admin\|moderator]` | Create an organizer account or reset its password (`ADMIN_PASSWORD` env var or prompt) |

@@ -8,9 +8,10 @@ type Sql = ReturnType<typeof postgres>;
 const globalForDb = globalThis as unknown as { __reunionSql?: Sql };
 
 function createClient(): Sql {
-  return postgres(env.databaseUrl, {
+  const { url, ssl } = env.database;
+  return postgres(url, {
     max: env.databasePoolMax,
-    ssl: env.databaseSsl ? "require" : false,
+    ssl: ssl ? "require" : false,
     // Required for transaction-mode poolers (Supabase pooler on port 6543, PgBouncer).
     prepare: false,
     idle_timeout: 20,

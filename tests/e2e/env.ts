@@ -9,6 +9,7 @@ export const E2E_ENV = {
   NEXT_PUBLIC_SITE_URL: E2E_URL,
   NEXT_DIST_DIR: ".next-test",
   MAX_UPLOAD_MB: "4",
+  SETUP_TOKEN: "e2e-setup-token-0123456789",
 };
 export const ADMIN = { email: "admin@test.local", password: "admin-password-123" };
 export const MODERATOR = { email: "moderator@test.local", password: "moderator-password-123" };

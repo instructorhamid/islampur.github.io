@@ -12,7 +12,7 @@ npm run test:all       # all of the above
 
 `npm run test:e2e`:
 
-1. drops and recreates the schema in the **`reunion_test`** database (override with `E2E_DATABASE_URL`), runs the migrations, seeds demo data and creates one `admin` and one `moderator` account;
+1. drops and recreates the schema in the **`reunion_test`** database (override with `E2E_DATABASE_URL`), runs the migrations and seeds demo data (no admin accounts; the first spec creates them through `/admin/setup` and the users page);
 2. builds the app into `.next-test/` and starts it on port 3100 with uploads in `tests/.tmp/uploads`;
 3. runs the specs in `tests/e2e/` in order. They share state; for example, the admin spec approves the registration created by the registration spec.
 
@@ -20,9 +20,9 @@ Create the test database once: `createdb reunion_test` (owned by the user in the
 
 ## What was verified (13 October 2026, local Postgres 16, production build, Chromium)
 
-**Unit tests: 39 passed.** They cover phone normalization (Bengali digits, `+880`/`880`/`0088` prefixes, separators, invalid operators), Bengali number/date/time formatting in Dhaka time, the registration schema (Bengali and English names, markup rejection, year range, consent), CSV formula-injection escaping, scrypt hashing, local-storage path-traversal protection, and the Supabase Storage HTTP calls (mocked).
+**Unit tests: 44 passed.** They cover phone normalization (Bengali digits, `+880`/`880`/`0088` prefixes, separators, invalid operators), Bengali number/date/time formatting in Dhaka time, the registration schema (Bengali and English names, markup rejection, year range, consent), CSV formula-injection escaping, scrypt hashing, local-storage path-traversal protection, the Supabase Storage HTTP calls including automatic bucket creation (mocked), and parsing of Vercel/Supabase connection strings.
 
-**End-to-end tests: 28 passed.** They map to the requested checks as follows:
+**End-to-end tests: 31 passed.** First-time setup is covered (setup notice on the login page, wrong code rejected, first admin created, moderator added, setup locked afterwards). They map to the requested checks as follows:
 
 | # | Requirement | Covered by |
 | --- | --- | --- |

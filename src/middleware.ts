@@ -5,7 +5,7 @@ import { NextResponse, type NextRequest } from "next/server";
 // in requireAdmin() on every admin page, action and route.
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  if (pathname === "/admin/login") return NextResponse.next();
+  if (pathname === "/admin/login" || pathname === "/admin/setup") return NextResponse.next();
   if (!request.cookies.has("ihs_admin_session")) {
     const url = request.nextUrl.clone();
     url.pathname = "/admin/login";

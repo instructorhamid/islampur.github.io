@@ -1,9 +1,9 @@
-// Recreates the e2e database from scratch: schema, provisional content, demo data and two admin accounts.
+// Recreates the e2e database from scratch: schema, provisional content and demo data (no admin accounts).
 import { execFileSync } from "node:child_process";
 import { mkdirSync, rmSync, writeFileSync } from "node:fs";
 import postgres from "postgres";
 import sharp from "sharp";
-import { ADMIN, E2E_ENV, MODERATOR } from "./env";
+import { E2E_ENV } from "./env";
 
 async function main() {
   const sql = postgres(E2E_ENV.DATABASE_URL, { max: 1, onnotice: () => {} });
@@ -15,8 +15,7 @@ async function main() {
     execFileSync("npx", ["tsx", ...args], { env: { ...env, ...extra }, stdio: "inherit" });
   run(["scripts/migrate.ts"]);
   run(["scripts/seed.ts"]);
-  run(["scripts/create-admin.ts", "--email", ADMIN.email, "--name", "পরীক্ষা অ্যাডমিন", "--role", "admin"], { ADMIN_PASSWORD: ADMIN.password });
-  run(["scripts/create-admin.ts", "--email", MODERATOR.email, "--name", "পরীক্ষা মডারেটর", "--role", "moderator"], { ADMIN_PASSWORD: MODERATOR.password });
+  // No admin accounts: 00-setup.spec.ts creates them through /admin/setup and /admin/users.
 
   rmSync("tests/.tmp", { recursive: true, force: true });
   mkdirSync("tests/.tmp/uploads", { recursive: true });

@@ -8,56 +8,44 @@ The site is a Next.js server application with a PostgreSQL database and file sto
 
 ## Option A: Vercel + Supabase (recommended)
 
-Both have free tiers that suit a community reunion site.
+### If you connected Supabase through Vercel (Storage / Marketplace integration)
 
-### 1. Supabase project
+The integration already adds `POSTGRES_URL`, `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` (or `SUPABASE_SECRET_KEY`) to the Vercel project. The app uses them directly:
 
-1. Create a project at <https://supabase.com> (choose a nearby region, e.g. Singapore or Mumbai).
-2. **Database connection strings**: open **Connect** in the project dashboard.
-   - *Session pooler* URI (port **5432**): use it to run migrations from your computer.
-   - *Transaction pooler* URI (port **6543**): use it as `DATABASE_URL` on Vercel. The app already disables prepared statements, which transaction pooling requires.
-3. **Run migrations and create the first organizer** from your computer:
+- **Database**: `POSTGRES_URL` is used when `DATABASE_URL` is not set (SSL and pooler settings are handled automatically).
+- **Migrations** run automatically on every Vercel build (`vercel-build` script → `npm run db:migrate && next build`). They are idempotent and safe if two builds run at once.
+- **Storage** switches to Supabase automatically when the Supabase credentials are present. The private bucket `reunion-media` is created on the first upload if it doesn't exist.
+- **Site URL** defaults to the Vercel production domain if `NEXT_PUBLIC_SITE_URL` is not set.
 
-   ```bash
-   export DATABASE_URL="postgresql://postgres.<ref>:<password>@aws-0-<region>.pooler.supabase.com:5432/postgres"
-   export DATABASE_SSL=require
-   npm run db:migrate
-   npm run admin:create -- --email organizer@example.com --name "আয়োজকের নাম"
-   ```
+You only need to add two variables yourself (**Vercel → Project → Settings → Environment Variables**, Production + Preview):
 
-   Do **not** run `npm run db:seed` against the production database.
+| Name | Value |
+| --- | --- |
+| `APP_SECRET` | a long random string, e.g. output of `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"` or any password generator (≥24 characters) |
+| `SETUP_TOKEN` | another random string (≥16 characters), used once to create the first organizer account |
 
-   The migration enables Row Level Security on every table without adding policies. Supabase's `anon` and `authenticated` keys therefore cannot read or change any data. Only the server, which connects as the database owner, can.
+Recommended: `DATABASE_POOL_MAX=2`, `MAX_UPLOAD_MB=4`, and `NEXT_PUBLIC_SITE_URL` once you have a custom domain.
 
-4. **Storage bucket**: go to **Storage → New bucket**:
-   - Name: `reunion-media`
-   - **Public bucket: OFF** (the app serves files itself after checking approval and consent)
-   - Restrict file size to 5 MB and allowed MIME types to `image/webp` (the server re-encodes every upload to WebP)
-5. Copy the **service_role** key from **Project Settings → API keys**. It is a secret: put it only in Vercel's server environment variables, never in client code.
+Then:
 
-### 2. Vercel project
+1. **Redeploy** (Deployments → ⋯ → Redeploy) so the new variables and migrations take effect. In the build log you should see `Applied 001_initial_schema.sql` and `Applied 002_default_content.sql` (on later builds: `Database is up to date.`).
+2. Open `https://<your-site>/admin/setup`, enter the `SETUP_TOKEN` and create the first admin account. The page locks itself permanently once an admin exists. You may then delete `SETUP_TOKEN` from Vercel.
+3. Follow the [launch checklist](#launch-checklist).
 
-1. Import the GitHub repository at <https://vercel.com/new>. The framework preset is Next.js; the default build command is fine.
-2. Set **Environment Variables** (Production and Preview):
+Do **not** run `npm run db:seed` against the production database (it adds demo people).
 
-   | Name | Value |
-   | --- | --- |
-   | `NEXT_PUBLIC_SITE_URL` | `https://your-domain.example` |
-   | `DATABASE_URL` | Transaction pooler URI (port 6543) |
-   | `DATABASE_SSL` | `require` |
-   | `DATABASE_POOL_MAX` | `2` |
-   | `APP_SECRET` | output of `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"` |
-   | `STORAGE_DRIVER` | `supabase` |
-   | `SUPABASE_URL` | `https://<ref>.supabase.co` |
-   | `SUPABASE_SERVICE_ROLE_KEY` | service_role key |
-   | `SUPABASE_STORAGE_BUCKET` | `reunion-media` |
-   | `MAX_UPLOAD_MB` | `4` (Vercel limits request bodies to 4.5 MB) |
+Row Level Security is enabled on every table without policies, so Supabase's public `anon` key cannot read or change any data; only the server can.
 
-3. Deploy, then add your domain under **Settings → Domains** and update `NEXT_PUBLIC_SITE_URL` to match.
+### Manual setup (without the integration)
+
+1. Create a Supabase project. From **Connect**, copy the *Transaction pooler* URI (port 6543).
+2. In Vercel set `DATABASE_URL` (that URI), `DATABASE_SSL=require`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` (Project Settings → API keys; keep it secret), `APP_SECRET`, `SETUP_TOKEN`.
+3. Deploy and continue from step 2 above.
 
 Notes:
-- `STORAGE_DRIVER=local` does **not** work on Vercel (read-only, ephemeral filesystem).
-- Photos are shrunk in the browser before upload, so phone photos stay under the 4 MB limit. Sponsor logos uploaded from the admin panel must also be under about 4.5 MB on Vercel.
+- `STORAGE_DRIVER=local` does **not** work on Vercel (read-only filesystem); don't set it there.
+- Vercel limits request bodies to 4.5 MB. Phone photos are shrunk in the browser first; sponsor logos must be under ~4.5 MB.
+- Vercel deploys the repository's production branch. If you later create `main`, set it as the production branch under **Settings → Git**.
 
 ---
 
@@ -79,7 +67,7 @@ git clone <repo-url> /srv/reunion && cd /srv/reunion
 npm ci
 cp .env.example .env.local   # set DATABASE_URL, APP_SECRET, NEXT_PUBLIC_SITE_URL, LOCAL_UPLOAD_DIR=/srv/reunion-uploads
 npm run db:migrate
-npm run admin:create -- --email organizer@example.com --name "আয়োজকের নাম"
+npm run admin:create -- --email organizer@example.com --name "আয়োজকের নাম"   # or use /admin/setup with SETUP_TOKEN
 npm run build
 ```
 

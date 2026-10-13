@@ -71,3 +71,30 @@ describe("supabase storage driver (HTTP contract, mocked)", () => {
     await expect(supabaseStorageDriver.put("alumni/x/full.webp", Buffer.from("x"), "image/webp")).rejects.toThrow(/403/);
   });
 });
+
+describe("supabase bucket bootstrap (mocked)", () => {
+  beforeEach(() => {
+    vi.stubEnv("SUPABASE_URL", "https://proj.supabase.co");
+    vi.stubEnv("SUPABASE_SECRET_KEY", "secret-key");
+  });
+  afterEach(() => {
+    vi.unstubAllEnvs();
+    vi.unstubAllGlobals();
+  });
+
+  it("creates a private bucket when it is missing and retries the upload", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(new Response('{"statusCode":"404","error":"Bucket not found"}', { status: 400 }))
+      .mockResolvedValueOnce(new Response('{"name":"reunion-media"}', { status: 200 }))
+      .mockResolvedValueOnce(new Response("{}", { status: 200 }));
+    vi.stubGlobal("fetch", fetchMock);
+    const { supabaseStorageDriver } = await import("@/lib/storage/supabase");
+    await supabaseStorageDriver.put("alumni/abc/full.webp", Buffer.from("img"), "image/webp");
+    const [bucketUrl, bucketInit] = fetchMock.mock.calls[1];
+    expect(bucketUrl).toBe("https://proj.supabase.co/storage/v1/bucket");
+    expect(JSON.parse(bucketInit.body)).toMatchObject({ id: "reunion-media", public: false });
+    expect(bucketInit.headers.Authorization).toBe("Bearer secret-key");
+    expect(fetchMock).toHaveBeenCalledTimes(3);
+  });
+});

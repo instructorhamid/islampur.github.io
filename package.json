@@ -15,7 +15,8 @@
     "admin:create": "tsx scripts/create-admin.ts",
     "test": "vitest run",
     "test:e2e": "tsx tests/e2e/reset-db.ts && playwright test",
-    "test:all": "npm run typecheck && npm test && npm run test:e2e"
+    "test:all": "npm run typecheck && npm test && npm run test:e2e",
+    "vercel-build": "npm run db:migrate && next build"
   },
   "engines": {
     "node": ">=20.9"

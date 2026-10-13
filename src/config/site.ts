@@ -26,7 +26,11 @@ export const site = {
   shortName: "ইসলামপুর পুনর্মিলনী",
   description:
     "ইসলামপুর উচ্চ বিদ্যালয়, ছাতক, সুনামগঞ্জের প্রাক্তন শিক্ষার্থী পুনর্মিলনী — নিবন্ধন, ব্যাচ ডিরেক্টরি, অনুষ্ঠানসূচি ও হালনাগাদ তথ্য।",
-  url: (process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000").replace(/\/$/, ""),
+  // NEXT_PUBLIC_SITE_URL wins; on Vercel the production domain is used automatically.
+  url: (
+    process.env.NEXT_PUBLIC_SITE_URL ||
+    (process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : "http://localhost:3000")
+  ).replace(/\/$/, ""),
 };
 
 export const mainNav = [
