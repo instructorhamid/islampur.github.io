@@ -16,6 +16,16 @@ describe("resolveDatabaseConfig", () => {
     expect(r).toEqual({ url: "postgres://postgres.abc:pw@aws-0-ap-southeast-1.pooler.supabase.com:6543/postgres", ssl: true });
   });
 
+  it("switches the Supabase session-mode pooler to transaction mode", () => {
+    const url = "postgres://postgres.abc:pw@aws-1-ap-southeast-2.pooler.supabase.com:5432/postgres?sslmode=require";
+    expect(resolveDatabaseConfig({ POSTGRES_URL: url })?.url).toBe(
+      "postgres://postgres.abc:pw@aws-1-ap-southeast-2.pooler.supabase.com:6543/postgres",
+    );
+    expect(resolveDatabaseConfig({ DATABASE_URL: "postgres://u:p@db.abc.supabase.co:5432/postgres" })?.url).toBe(
+      "postgres://u:p@db.abc.supabase.co:5432/postgres",
+    );
+  });
+
   it("honours explicit DATABASE_SSL and sslmode", () => {
     expect(resolveDatabaseConfig({ DATABASE_URL: "postgres://u@db.example.com/x?sslmode=require" })?.ssl).toBe(true);
     expect(resolveDatabaseConfig({ DATABASE_URL: "postgres://u@localhost/x", DATABASE_SSL: "require" })?.ssl).toBe(true);

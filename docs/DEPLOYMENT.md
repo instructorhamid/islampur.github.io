@@ -14,6 +14,7 @@ The integration already adds `POSTGRES_URL`, `SUPABASE_URL` and `SUPABASE_SERVIC
 
 - **Database**: `POSTGRES_URL` is used when `DATABASE_URL` is not set (SSL and pooler settings are handled automatically).
 - **Migrations** run automatically on every Vercel build (`vercel-build` script → `npm run db:migrate && next build`). They are idempotent and safe if two builds run at once.
+- **Connection pooling**: a Supabase pooler URL on port 5432 (session mode) is switched to port 6543 (transaction mode) automatically. Session mode allows only ~15 clients and fails under serverless traffic with `EMAXCONNSESSION max clients reached in session mode`.
 - **Storage** switches to Supabase automatically when the Supabase credentials are present. The private bucket `reunion-media` is created on the first upload if it doesn't exist.
 - **Site URL** defaults to the Vercel production domain if `NEXT_PUBLIC_SITE_URL` is not set.
 
