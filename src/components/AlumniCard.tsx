@@ -50,19 +50,3 @@ export function AlumniGrid({ items }: { items: PublicAlumnus[] }) {
     </ul>
   );
 }
-
-export function AlumniGridSkeleton({ count = 12 }: { count?: number }) {
-  return (
-    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4 xl:grid-cols-6" aria-hidden="true">
-      {Array.from({ length: count }, (_, i) => (
-        <div key={i} className="card overflow-hidden">
-          <div className="skeleton aspect-square !rounded-none" />
-          <div className="space-y-2 p-4">
-            <div className="skeleton h-4 w-3/4" />
-            <div className="skeleton h-4 w-1/2" />
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-}

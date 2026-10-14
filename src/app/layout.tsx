@@ -1,5 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Hind_Siliguri, Noto_Sans_Bengali } from "next/font/google";
+import { Suspense } from "react";
+import { NavigationProgress } from "@/components/NavigationProgress";
 import { site } from "@/config/site";
 import "./globals.css";
 
@@ -46,7 +48,12 @@ export const dynamic = "force-dynamic";
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="bn" className={`${heading.variable} ${body.variable}`}>
-      <body className="min-h-dvh">{children}</body>
+      <body className="min-h-dvh">
+        <Suspense fallback={null}>
+          <NavigationProgress />
+        </Suspense>
+        {children}
+      </body>
     </html>
   );
 }
